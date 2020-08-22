@@ -1,0 +1,24 @@
+sudo: required
+services:
+    - docker
+
+before_install:
+    - docker build -t complex -f ./clent/Dockerfile.dev ./client
+script:
+    - docker run -e CI=true complex npm test -- --coverage
+after_success:
+    - docker build -t complex/client ./client
+    - docker build -t complex/nginx ./nginx
+    - docker build -t complex/server ./server
+    - docker build -t complex/worker ./worker
+
+# Login using Docker CLI 
+    - echo "$DOCKER_PASSWORD" |  docker login -u "$DOCKER_ID" --password-stdin
+
+# Push to DockerHub the Images
+    - docker push  complex/client
+    - docker push  complex/nginx  
+    - docker push  complex/server  
+    - docker push  complex/worker      
+
+
